@@ -3,15 +3,18 @@ import { View, Image, Text, StyleSheet } from 'react-native';
 
 import globalStyles from '../styles';
 import { formattAmount } from '../helpers';
-
+import { Bill } from '../types';
+import CircularProgress from 'react-native-circular-progress-indicator';
 interface BudgetControlProps {
   budget: number;
-  bills: { id: number; amount: number }[];
+  bills: Bill[];
 }
 
 const BudgetControl: React.FC<BudgetControlProps> = ({ budget, bills }) => {
   const [available, setAvailable] = useState(0);
   const [spent, setSpent] = useState(0);
+
+  const [percentage, setPercentage] = useState(0);
 
   useEffect(() => {
     const totalSpent = bills.reduce(
@@ -21,15 +24,25 @@ const BudgetControl: React.FC<BudgetControlProps> = ({ budget, bills }) => {
 
     const availableAmount = budget - totalSpent;
 
-    setSpent(totalSpent);
+    const newPercentage =
+      ((budget - availableAmount) / budget) * 100;
+    setPercentage(newPercentage);
 
+    setSpent(totalSpent);
     setAvailable(availableAmount);
-  }, []);
+  }, [bills]);
 
   return (
     <View style={styles.container}>
       <View style={styles.centerGraph}>
-        <Image style={styles.image} source={require('../img/grafico.jpg')} />
+      <CircularProgress 
+        value={percentage}
+        radius={150}
+        valueSuffix='%'
+        title='Gastado'
+        inActiveStrokeColor='#f5f5f5'
+        duration={1500}
+      />
       </View>
 
       <View style={styles.textContainer}>
